@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from expansion import Expansion
 import argparse
 
@@ -7,11 +5,12 @@ def set_config(exp):
     """Update expansion board configuration"""
     print("⚙️  Updating expansion board configuration...", end="")
     exp.set_i2c_addr(exp.I2C_ADDRESS)   # I2C address (Default: 0x21)
-    exp.set_all_led_color(255,255,255)  # LED RGB colors: 0-255 (Default: 255,255,255)
     exp.set_led_mode(4)                 # LED display mode: 1 = RGB, 2 = following, 3 = breathing, 4 = rainbow (Default: 4)
+    exp.set_all_led_color(0, 0, 0)      # LED colors in RGB mode: 0-255 (Default: 255, 255, 255)
     exp.set_fan_mode(2)                 # Fan control mode: 1 = manual, 2 = auto (Default: 2)
-    exp.set_fan_duty(0, 0)              # Fan0 and Fan1 duty cycle: 0-255 (Default: 0,0)
-    exp.set_fan_threshold(45, 60)       # Fan lower + upper temperature threshold: 45-60°C (Default: 30,45)
+    exp.set_fan_frequency(50)           # Fan frequency in Hz (Default: 50)
+    exp.set_fan_duty(0, 0)              # Fan0 and Fan1 duty cycle: 0-255 (Default: 0, 0)
+    exp.set_fan_threshold(45, 60)       # Fan lower + upper temperature threshold: 45-60°C (Default: 30, 45)
     exp.set_power_on_check(1)           # Power-on check: 1 = enable, 0 = disable (Default: 1)
     exp.set_save_flash(1)               # Save to flash: 1 = enable, 0 = disable
     print("DONE")

@@ -1,19 +1,18 @@
-# -*- coding: utf-8 -*-
 # Freenove expansion board Python library
 # Modified from original at https://github.com/Freenove/Freenove_Computer_Case_Kit_for_Raspberry_Pi/blob/main/Code/expansion.py
 import smbus
 
 class Expansion:
     I2C_ADDRESS = 0x21
-    REG_I2C_ADDRESS = 0x00       # Set I2C address
-    REG_LED_SPECIFIED = 0x01     # Set specified LED color
-    REG_LED_ALL = 0x02           # Set all LEDs color
-    REG_LED_MODE = 0x03          # Set LED running mode
-    REG_FAN_MODE = 0x04          # Set fan running mode
-    REG_FAN_FREQUENCY = 0x05     # Set fan frequency
-    REG_FAN_DUTY = 0x06          # Set fan duty cycle
-    REG_FAN_THRESHOLD = 0x07     # Set fan temperature threshold
-    REG_POWER_ON_CHECK = 0x08    # Set power-on check
+    REG_I2C_ADDRESS = 0x00        # Set I2C address
+    REG_LED_SPECIFIED = 0x01      # Set specified LED color
+    REG_LED_ALL = 0x02            # Set all LEDs color
+    REG_LED_MODE = 0x03           # Set LED running mode
+    REG_FAN_MODE = 0x04           # Set fan running mode
+    REG_FAN_FREQUENCY = 0x05      # Set fan frequency
+    REG_FAN_DUTY = 0x06           # Set fan duty cycle
+    REG_FAN_THRESHOLD = 0x07      # Set fan temperature threshold
+    REG_POWER_ON_CHECK = 0x08     # Set power-on check
     REG_SAVE_FLASH = 0xff         # Save to flash
 
     REG_I2C_ADDRESS_READ = 0xf3   # Read I2C address

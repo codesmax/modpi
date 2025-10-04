@@ -2,7 +2,6 @@ import sys
 import time
 import argparse
 import psutil
-from psutil._common import bytes2human
 
 from luma.core.interface.serial import i2c
 from luma.core.render import canvas
@@ -10,6 +9,38 @@ from luma.oled.device import ssd1306
 from PIL import ImageFont
 
 from expansion import Expansion
+
+def format_bytes(num, dp=1):
+    """Format bytes to human readable format with configurable decimal places"""
+    for unit in ("B", "K", "M", "G", "T"):
+        if abs(num) < 1024.0 or unit == "T":
+            return f"{round(num)}{unit}" if dp == 0 else f"{num:.{dp}f}{unit}"
+        num /= 1024.0
+
+def format_uptime(seconds):
+    """Format uptime to most significant unit only"""
+    minute = 60
+    hour = 60 * minute
+    day = 24 * hour
+    week = 7 * day
+    month = 30 * day
+    year = 365 * day
+
+    units = [
+        (year, 'y'),
+        (month, 'mo'),
+        (week, 'w'),
+        (day, 'd'),
+        (hour, 'h'),
+        (minute, 'm'),
+        (1, 's')
+    ]
+
+    for divisor, suffix in units:
+        if seconds >= divisor:
+            value = round(seconds / divisor)
+            return f"{value}{suffix}"
+    return "0s"
 
 class OLEDStats:
     def __init__(self, refresh_interval=1):
@@ -24,7 +55,7 @@ class OLEDStats:
         self.height = 64
 
         # Layout configuration
-        self.padding = 2
+        self.margin = 2
         self.icon_width = 16
         self.line_height = 16
 
@@ -32,9 +63,10 @@ class OLEDStats:
         self.ICON_CPU = '\uf2db'
         self.ICON_MEMORY = '\uf538'
         self.ICON_NETWORK = '\uf6ff'
-        self.ICON_TEMP = '\uf2c9'
-        self.ICON_DOWN = '\uf063'
-        self.ICON_UP = '\uf062'
+        self.ICON_TEMP_CPU = '\uf2c9'
+        self.ICON_TEMP_BOARD = '\uf108'
+        self.ICON_FAN = '\uf863'
+        self.ICON_UPTIME = '\uf017'
 
         # Network traffic tracking
         self.prev_net = None
@@ -45,7 +77,7 @@ class OLEDStats:
             self.device = ssd1306(serial)
 
             # Load fonts
-            self.font = ImageFont.load_default()
+            self.font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 12)
             self.icon_font = ImageFont.truetype('fa7-solid-900.otf', 12)
 
             # Initialize expansion board
@@ -77,33 +109,54 @@ class OLEDStats:
                 self.prev_net = curr_net
 
                 # Format network speeds
-                recv_str = bytes2human(recv_rate)
-                sent_str = bytes2human(sent_rate)
+                recv_str = format_bytes(recv_rate, 0)
+                sent_str = format_bytes(sent_rate, 0)
+
+                # Fan speed
+                fan_speed = psutil.sensors_fans()['pwmfan'][0].current
+
+                # Uptime
+                uptime_seconds = time.time() - psutil.boot_time()
+                uptime_str = format_uptime(uptime_seconds)
 
                 # Draw to OLED
+                # Designed for 4-line display on 128x64 OLED
                 with canvas(self.device) as draw:
                     # Computed positions
-                    line1_y = 0
-                    line2_y = self.line_height
-                    line3_y = self.line_height * 2
+                    line1_y = self.margin
+                    line2_y = self.line_height + self.margin
+                    line3_y = self.line_height * 2 + self.margin
+                    line4_y = self.line_height * 3 + self.margin
                     mid_x = self.width // 2
 
+                    # X positions for left and right columns
+                    left_icon_x = self.margin
+                    left_text_x = self.margin + self.icon_width
+                    right_icon_x = mid_x + self.margin
+                    right_text_x = mid_x + self.margin + self.icon_width
+
                     # Line 1: CPU and Memory
-                    draw.text((0, line1_y), self.ICON_CPU, font=self.icon_font, fill="white")
-                    draw.text((self.icon_width, line1_y + self.padding), f"{cpu_usage:.1f}%", font=self.font, fill="white")
-                    draw.text((mid_x - 8, line1_y), self.ICON_MEMORY, font=self.icon_font, fill="white")
-                    draw.text((mid_x + 8, line1_y + self.padding), f"{mem_usage:.1f}%", font=self.font, fill="white")
+                    draw.text((left_icon_x, line1_y), self.ICON_CPU, font=self.icon_font, fill="white")
+                    draw.text((left_text_x, line1_y), f"{cpu_usage:.1f}%", font=self.font, fill="white")
+                    draw.text((right_icon_x, line1_y), self.ICON_MEMORY, font=self.icon_font, fill="white")
+                    draw.text((right_text_x, line1_y), f"{mem_usage:.1f}%", font=self.font, fill="white")
 
                     # Line 2: Network
-                    draw.text((0, line2_y), self.ICON_NETWORK, font=self.icon_font, fill="white")
-                    draw.text((self.icon_width, line2_y + self.padding), f"{recv_str}/s", font=self.font, fill="white")
-                    draw.text((mid_x - 4, line2_y + self.padding), self.ICON_DOWN, font=self.icon_font, fill="white")
-                    draw.text((mid_x + 6, line2_y + self.padding), f"{sent_str}/s", font=self.font, fill="white")
-                    draw.text((self.width - 14, line2_y + self.padding), self.ICON_UP, font=self.icon_font, fill="white")
+                    draw.text((left_icon_x, line2_y), self.ICON_NETWORK, font=self.icon_font, fill="white")
+                    draw.text((left_text_x, line2_y), f"{recv_str}/s ↓", font=self.font, fill="white")
+                    draw.text((right_text_x, line2_y), f"{sent_str}/s ↑", font=self.font, fill="white")
 
                     # Line 3: Temperature
-                    draw.text((0, line3_y), self.ICON_TEMP, font=self.icon_font, fill="white")
-                    draw.text((self.icon_width, line3_y + self.padding), f"{cpu_temp:.1f}°C / {board_temp:.1f}°C", font=self.font, fill="white")
+                    draw.text((left_icon_x, line3_y), self.ICON_TEMP_CPU, font=self.icon_font, fill="white")
+                    draw.text((left_text_x, line3_y), f"{cpu_temp:.1f}°C", font=self.font, fill="white")
+                    draw.text((right_icon_x, line3_y), self.ICON_TEMP_BOARD, font=self.icon_font, fill="white")
+                    draw.text((right_text_x, line3_y), f"{board_temp:.1f}°C", font=self.font, fill="white")
+
+                    # Line 4: Uptime and Fan Speed
+                    draw.text((left_icon_x, line4_y), self.ICON_UPTIME, font=self.icon_font, fill="white")
+                    draw.text((left_text_x, line4_y), uptime_str, font=self.font, fill="white")
+                    draw.text((right_icon_x, line4_y), self.ICON_FAN, font=self.icon_font, fill="white")
+                    draw.text((right_text_x, line4_y), f"{fan_speed:.0f}", font=self.font, fill="white")
 
                 time.sleep(self.refresh_interval)
             except Exception as e:
