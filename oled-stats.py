@@ -97,9 +97,9 @@ class OLEDStats:
                     # Line 2: Network
                     draw.text((0, line2_y), self.ICON_NETWORK, font=self.icon_font, fill="white")
                     draw.text((self.icon_width, line2_y + self.padding), f"{recv_str}/s", font=self.font, fill="white")
-                    draw.text((mid_x - 4, line2_y + self.padding), self.ICON_DOWN, font=self.font, fill="white")
+                    draw.text((mid_x - 4, line2_y + self.padding), self.ICON_DOWN, font=self.icon_font, fill="white")
                     draw.text((mid_x + 6, line2_y + self.padding), f"{sent_str}/s", font=self.font, fill="white")
-                    draw.text((self.width - 14, line2_y + self.padding), self.ICON_UP, font=self.font, fill="white")
+                    draw.text((self.width - 14, line2_y + self.padding), self.ICON_UP, font=self.icon_font, fill="white")
 
                     # Line 3: Temperature
                     draw.text((0, line3_y), self.ICON_TEMP, font=self.icon_font, fill="white")
