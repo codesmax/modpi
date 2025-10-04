@@ -46,7 +46,7 @@ class OLEDStats:
 
             # Load fonts
             self.font = ImageFont.load_default()
-            self.icon_font = ImageFont.truetype('Font Awesome 7 Free-Solid-900.otf', 12)
+            self.icon_font = ImageFont.truetype('fa7-solid-900.otf', 12)
 
             # Initialize expansion board
             self.expansion = Expansion()
