@@ -11,12 +11,11 @@ sudo apt install -y git python3-luma.oled python3-smbus python3-psutil
 # Create modpi user if it doesn't exist
 if ! id "modpi" &>/dev/null; then
     echo "Creating modpi user..."
-    sudo useradd -r -s /bin/false -d /opt/modpi modpi
+    sudo useradd -r -s /bin/false -d /opt/modpi -G i2c modpi
+else
+    # Ensure existing user is in i2c group
+    sudo usermod -a -G i2c modpi
 fi
-
-# Add modpi user to i2c group for hardware access
-echo "Adding modpi user to i2c group..."
-sudo usermod -a -G i2c modpi
 
 # Create installation directory
 echo "Setting up installation directory..."
