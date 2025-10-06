@@ -14,6 +14,13 @@ if ! id "modpi" &>/dev/null; then
     sudo useradd -r -s /bin/false -d /opt/modpi modpi
 fi
 
+# Create installation directory
+echo "Setting up installation directory..."
+if [[ ! -d /opt/modpi ]]; then
+    sudo mkdir -p /opt/modpi
+    sudo chown modpi:modpi /opt/modpi
+fi
+
 # Clone or update repository
 if [[ ! -d /opt/modpi/.git ]]; then
     echo "Cloning modpi repository..."
