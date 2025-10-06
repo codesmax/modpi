@@ -1,0 +1,13 @@
+[Unit]
+Description=Turn off LEDs on shutdown
+DefaultDependencies=no
+Before=shutdown.target reboot.target halt.target
+
+[Service]
+Type=oneshot
+User=modpi
+WorkingDirectory=/opt/modpi
+ExecStart=/usr/bin/python3 /opt/modpi/exp-config.py --led-mode 1 --led-color 0,0,0 --save
+
+[Install]
+WantedBy=shutdown.target reboot.target halt.target

@@ -1,0 +1,14 @@
+[Unit]
+Description=Display Raspberry Pi stats on OLED
+After=multi-user.target
+
+[Service]
+Type=simple
+User=modpi
+WorkingDirectory=/opt/modpi
+ExecStart=/usr/bin/python3 /opt/modpi/oled-stats.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
