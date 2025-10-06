@@ -14,6 +14,10 @@ if ! id "modpi" &>/dev/null; then
     sudo useradd -r -s /bin/false -d /opt/modpi modpi
 fi
 
+# Add modpi user to i2c group for hardware access
+echo "Adding modpi user to i2c group..."
+sudo usermod -a -G i2c modpi
+
 # Create installation directory
 echo "Setting up installation directory..."
 if [[ ! -d /opt/modpi ]]; then
