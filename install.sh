@@ -46,17 +46,23 @@ sudo systemctl enable oled-stats.service
 sudo systemctl start exp-config-startup.service
 sudo systemctl start oled-stats.service
 
-echo ""
-echo "✅ Installation complete!"
-echo ""
-echo "Services installed:"
-echo "  - exp-config-startup.service (enabled, started)"
-echo "  - exp-config-shutdown.service (enabled)"
-echo "  - oled-stats.service (enabled, started)"
-echo ""
-echo "Check status with:"
-echo "  sudo systemctl status oled-stats.service"
-echo "  sudo systemctl status exp-config-startup.service"
-echo ""
-echo "View logs with:"
-echo "  sudo journalctl -u modpi -f"
+cat <<EOF
+
+✅ Installation complete!
+
+Services installed:
+  - exp-config-startup.service (enabled, started)
+  - exp-config-shutdown.service (enabled)
+  - oled-stats.service (enabled, started)
+
+Check status with:
+  sudo systemctl status oled-stats.service
+  sudo systemctl status exp-config-startup.service
+  sudo systemctl status exp-config-shutdown.service
+
+View logs with:
+  sudo journalctl -u exp-config-startup.service -f
+  sudo journalctl -u exp-config-shutdown.service -f
+  sudo journalctl -u oled-stats.service -f
+
+EOF
