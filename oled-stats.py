@@ -2,6 +2,7 @@ import sys
 import time
 import argparse
 import psutil
+import signal
 
 from luma.core.interface.serial import i2c
 from luma.core.render import canvas
@@ -166,6 +167,8 @@ class OLEDStats:
     def cleanup(self):
         if self.expansion:
             self.expansion.end()
+        if self.device:
+            self.device.clear()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Display Raspberry Pi stats on OLED')
@@ -174,6 +177,14 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     oled_stats = None
+
+    def signal_handler(sig, frame):
+        if oled_stats:
+            oled_stats.cleanup()
+        sys.exit(0)
+
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
 
     try:
         oled_stats = OLEDStats(refresh_interval=args.refresh)
